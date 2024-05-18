@@ -1,0 +1,342 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/wilgoulartt/Aula-Simula-o-Num-rica/blob/main/Aula%20simulacao%201\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "!pip install cdsapi netCDF4 matplotlib cartopy"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "UrlVJMzBGg7J",
+        "outputId": "3d230b0c-2f86-445c-f049-c3ae3ea53e5b"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Collecting cdsapi\n",
+            "  Downloading cdsapi-0.7.0-py2.py3-none-any.whl (12 kB)\n",
+            "Collecting netCDF4\n",
+            "  Downloading netCDF4-1.6.5-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (5.5 MB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m5.5/5.5 MB\u001b[0m \u001b[31m16.0 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hRequirement already satisfied: matplotlib in /usr/local/lib/python3.10/dist-packages (3.7.1)\n",
+            "Collecting cartopy\n",
+            "  Downloading Cartopy-0.23.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (11.6 MB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m11.6/11.6 MB\u001b[0m \u001b[31m48.3 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hCollecting cads-api-client>=0.9.2 (from cdsapi)\n",
+            "  Downloading cads_api_client-1.0.2-py3-none-any.whl (20 kB)\n",
+            "Requirement already satisfied: requests>=2.5.0 in /usr/local/lib/python3.10/dist-packages (from cdsapi) (2.31.0)\n",
+            "Requirement already satisfied: tqdm in /usr/local/lib/python3.10/dist-packages (from cdsapi) (4.66.4)\n",
+            "Collecting cftime (from netCDF4)\n",
+            "  Downloading cftime-1.6.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (1.3 MB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m1.3/1.3 MB\u001b[0m \u001b[31m50.6 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hRequirement already satisfied: certifi in /usr/local/lib/python3.10/dist-packages (from netCDF4) (2024.2.2)\n",
+            "Requirement already satisfied: numpy in /usr/local/lib/python3.10/dist-packages (from netCDF4) (1.25.2)\n",
+            "Requirement already satisfied: contourpy>=1.0.1 in /usr/local/lib/python3.10/dist-packages (from matplotlib) (1.2.1)\n",
+            "Requirement already satisfied: cycler>=0.10 in /usr/local/lib/python3.10/dist-packages (from matplotlib) (0.12.1)\n",
+            "Requirement already satisfied: fonttools>=4.22.0 in /usr/local/lib/python3.10/dist-packages (from matplotlib) (4.51.0)\n",
+            "Requirement already satisfied: kiwisolver>=1.0.1 in /usr/local/lib/python3.10/dist-packages (from matplotlib) (1.4.5)\n",
+            "Requirement already satisfied: packaging>=20.0 in /usr/local/lib/python3.10/dist-packages (from matplotlib) (24.0)\n",
+            "Requirement already satisfied: pillow>=6.2.0 in /usr/local/lib/python3.10/dist-packages (from matplotlib) (9.4.0)\n",
+            "Requirement already satisfied: pyparsing>=2.3.1 in /usr/local/lib/python3.10/dist-packages (from matplotlib) (3.1.2)\n",
+            "Requirement already satisfied: python-dateutil>=2.7 in /usr/local/lib/python3.10/dist-packages (from matplotlib) (2.8.2)\n",
+            "Requirement already satisfied: shapely>=1.7 in /usr/local/lib/python3.10/dist-packages (from cartopy) (2.0.4)\n",
+            "Requirement already satisfied: pyshp>=2.3 in /usr/local/lib/python3.10/dist-packages (from cartopy) (2.3.1)\n",
+            "Requirement already satisfied: pyproj>=3.3.1 in /usr/local/lib/python3.10/dist-packages (from cartopy) (3.6.1)\n",
+            "Requirement already satisfied: attrs in /usr/local/lib/python3.10/dist-packages (from cads-api-client>=0.9.2->cdsapi) (23.2.0)\n",
+            "Collecting multiurl (from cads-api-client>=0.9.2->cdsapi)\n",
+            "  Downloading multiurl-0.3.1.tar.gz (18 kB)\n",
+            "  Preparing metadata (setup.py) ... \u001b[?25l\u001b[?25hdone\n",
+            "Requirement already satisfied: typing-extensions in /usr/local/lib/python3.10/dist-packages (from cads-api-client>=0.9.2->cdsapi) (4.11.0)\n",
+            "Requirement already satisfied: six>=1.5 in /usr/local/lib/python3.10/dist-packages (from python-dateutil>=2.7->matplotlib) (1.16.0)\n",
+            "Requirement already satisfied: charset-normalizer<4,>=2 in /usr/local/lib/python3.10/dist-packages (from requests>=2.5.0->cdsapi) (3.3.2)\n",
+            "Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.10/dist-packages (from requests>=2.5.0->cdsapi) (3.7)\n",
+            "Requirement already satisfied: urllib3<3,>=1.21.1 in /usr/local/lib/python3.10/dist-packages (from requests>=2.5.0->cdsapi) (2.0.7)\n",
+            "Requirement already satisfied: pytz in /usr/local/lib/python3.10/dist-packages (from multiurl->cads-api-client>=0.9.2->cdsapi) (2023.4)\n",
+            "Building wheels for collected packages: multiurl\n",
+            "  Building wheel for multiurl (setup.py) ... \u001b[?25l\u001b[?25hdone\n",
+            "  Created wheel for multiurl: filename=multiurl-0.3.1-py3-none-any.whl size=21131 sha256=8bdcd4d2faaa55842cb8b448872b732d59fd729420b62756120334104d76c7bc\n",
+            "  Stored in directory: /root/.cache/pip/wheels/9b/d9/5f/36a39fd10d15b5b2d362ad6dc8a1bd28a3b1e14e08357944bf\n",
+            "Successfully built multiurl\n",
+            "Installing collected packages: cftime, netCDF4, multiurl, cartopy, cads-api-client, cdsapi\n",
+            "Successfully installed cads-api-client-1.0.2 cartopy-0.23.0 cdsapi-0.7.0 cftime-1.6.3 multiurl-0.3.1 netCDF4-1.6.5\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import cdsapi\n",
+        "import netCDF4 as nc\n",
+        "import numpy as np\n",
+        "import matplotlib.pyplot as plt\n",
+        "import cartopy.crs as ccrs\n",
+        "import cartopy.feature as cfeature"
+      ],
+      "metadata": {
+        "id": "mBxe31KvGrpE"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#Solar\n",
+        "import cdsapi\n",
+        "\n",
+        "cdsapi_config = \"\"\"\n",
+        "url: https://cds.climate.copernicus.eu/api/v2\n",
+        "key: 311426:9f1b85b6-af52-4bd9-a9de-b58abc220c8c\n",
+        "\"\"\"\n",
+        "\n",
+        "with open(\"/root/.cdsapirc\", \"w\") as f:\n",
+        "    f.write(cdsapi_config)\n",
+        "\n",
+        "c = cdsapi.Client()"
+      ],
+      "metadata": {
+        "id": "AY9NCJRnHEWS"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "c = cdsapi.Client()\n",
+        "\n",
+        "c.retrieve(\n",
+        "    'reanalysis-era5-single-levels',\n",
+        "    {\n",
+        "        'product_type': 'reanalysis',\n",
+        "        'format': 'netcdf',\n",
+        "        'variable': [\n",
+        "            'maximum_individual_wave_height', 'mean_direction_of_wind_waves', 'mean_period_of_total_swell',\n",
+        "            'mean_wave_period', 'mean_wave_period_of_first_swell_partition', 'model_bathymetry',\n",
+        "            'significant_height_of_total_swell', 'significant_height_of_wind_waves',\n",
+        "        ],\n",
+        "        'year': '2024',\n",
+        "        'month': [\n",
+        "            '01'\n",
+        "        ],\n",
+        "        'day': [\n",
+        "            '01',\n",
+        "        ],\n",
+        "        'time': [\n",
+        "            '00:00',\n",
+        "        ],\n",
+        "        'area': [\n",
+        "            -27, -45, -20, -35,\n",
+        "        ],\n",
+        "    },\n",
+        "    'Era5_2022_MARES_CAMPOS.nc')"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "vuNj-ZiuHK2m",
+        "outputId": "eef44687-87ea-46f7-cac0-9589534da05b"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "2024-05-18 14:30:45,732 INFO Welcome to the CDS\n",
+            "INFO:cdsapi:Welcome to the CDS\n",
+            "2024-05-18 14:30:45,736 INFO Sending request to https://cds.climate.copernicus.eu/api/v2/resources/reanalysis-era5-single-levels\n",
+            "INFO:cdsapi:Sending request to https://cds.climate.copernicus.eu/api/v2/resources/reanalysis-era5-single-levels\n",
+            "2024-05-18 14:30:45,906 INFO Request is completed\n",
+            "INFO:cdsapi:Request is completed\n",
+            "2024-05-18 14:30:45,910 INFO Downloading https://download-0012-clone.copernicus-climate.eu/cache-compute-0012/cache/data3/adaptor.mars.internal-1716036942.1527982-18869-1-e495c371-a1ff-4233-b0cd-b731f1d0df57.nc to Era5_2022_MARES_CAMPOS.nc (7.8K)\n",
+            "INFO:cdsapi:Downloading https://download-0012-clone.copernicus-climate.eu/cache-compute-0012/cache/data3/adaptor.mars.internal-1716036942.1527982-18869-1-e495c371-a1ff-4233-b0cd-b731f1d0df57.nc to Era5_2022_MARES_CAMPOS.nc (7.8K)\n",
+            "2024-05-18 14:30:46,795 INFO Download rate 8.9K/s\n",
+            "INFO:cdsapi:Download rate 8.9K/s\n"
+          ]
+        },
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "Result(content_length=8032,content_type=application/x-netcdf,location=https://download-0012-clone.copernicus-climate.eu/cache-compute-0012/cache/data3/adaptor.mars.internal-1716036942.1527982-18869-1-e495c371-a1ff-4233-b0cd-b731f1d0df57.nc)"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 14
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#Eólica Offshore 875HPA\n",
+        "\n",
+        "import cdsapi\n",
+        "\n",
+        "c = cdsapi.Client()\n",
+        "\n",
+        "c.retrieve(\n",
+        "    'reanalysis-era5-pressure-levels',\n",
+        "    {\n",
+        "        'product_type': 'reanalysis',\n",
+        "        'format': 'netcdf',\n",
+        "        'variable': [\n",
+        "            'u_component_of_wind', 'v_component_of_wind',\n",
+        "        ],\n",
+        "        'pressure_level': '875',\n",
+        "        'year': '2022',\n",
+        "         'month': [\n",
+        "            '01', '02', '03',\n",
+        "            '04', '05', '06',\n",
+        "            '07', '08', '09',\n",
+        "            '10', '11', '12',\n",
+        "        ],\n",
+        "        'day': [\n",
+        "            '01', '02', '03',\n",
+        "            '04', '05', '06',\n",
+        "            '07', '08', '09',\n",
+        "            '10', '11', '12',\n",
+        "            '13', '14', '15',\n",
+        "            '16', '17', '18',\n",
+        "            '19', '20', '21',\n",
+        "            '22', '23', '24',\n",
+        "            '25', '26', '27',\n",
+        "            '28', '29', '30',\n",
+        "            '31',\n",
+        "        ],\n",
+        "        'time': [\n",
+        "            '00:00', '01:00', '02:00',\n",
+        "            '03:00', '04:00', '05:00',\n",
+        "            '06:00', '07:00', '08:00',\n",
+        "            '09:00', '10:00', '11:00',\n",
+        "            '12:00', '13:00', '14:00',\n",
+        "            '15:00', '16:00', '17:00',\n",
+        "            '18:00', '19:00', '20:00',\n",
+        "            '21:00', '22:00', '23:00',\n",
+        "        ],\n",
+        "        'area': [\n",
+        "            -27, -45, -20, -35,  # Coordenadas da Bacia de Campos e um pouco mais pegando a costa brasileira\n",
+        "        ],\n",
+        "    },\n",
+        "    'Era5_2022_875HPA_CAMPOS.nc')\n",
+        "import xarray as xr\n",
+        "\n",
+        "titulo = \"Marcação das Plataformas na Bacia de Campos Desativadas\"\n",
+        "\n",
+        "titulo_html = \"\"\"<h1 align=\"center\" style=\"font-family: verdana; font-size:16px; font-weight:bold; text-transform: uppercase;\">{}</h1>\"\"\".format(titulo)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "mFE0hNCPHnq8",
+        "outputId": "fb829304-a8ef-4581-a18c-c0b9c3516d55"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "2024-05-18 14:32:43,678 INFO Welcome to the CDS\n",
+            "INFO:cdsapi:Welcome to the CDS\n",
+            "2024-05-18 14:32:43,682 INFO Sending request to https://cds.climate.copernicus.eu/api/v2/resources/reanalysis-era5-pressure-levels\n",
+            "INFO:cdsapi:Sending request to https://cds.climate.copernicus.eu/api/v2/resources/reanalysis-era5-pressure-levels\n",
+            "2024-05-18 14:32:43,865 INFO Request is completed\n",
+            "INFO:cdsapi:Request is completed\n",
+            "2024-05-18 14:32:43,869 INFO Downloading https://download-0006-clone.copernicus-climate.eu/cache-compute-0006/cache/data4/adaptor.mars.internal-1716040212.4455051-29866-15-8a66b040-2669-4370-bd1e-38135f25105d.nc to Era5_2022_875HPA_CAMPOS.nc (39.8M)\n",
+            "INFO:cdsapi:Downloading https://download-0006-clone.copernicus-climate.eu/cache-compute-0006/cache/data4/adaptor.mars.internal-1716040212.4455051-29866-15-8a66b040-2669-4370-bd1e-38135f25105d.nc to Era5_2022_875HPA_CAMPOS.nc (39.8M)\n",
+            "2024-05-18 14:32:48,658 INFO Download rate 8.3M/s\n",
+            "INFO:cdsapi:Download rate 8.3M/s\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import netCDF4 as nc\n",
+        "\n",
+        "# Open the NetCDF file\n",
+        "dataset = nc.Dataset('Era5_2022_875HPA_CAMPOS.nc')\n",
+        "\n",
+        "# Print the dimensions of the dataset\n",
+        "print(\"Dimensions:\")\n",
+        "for dim in dataset.dimensions.values():\n",
+        "    print(dim.name, len(dim))\n",
+        "\n",
+        "# Print the variables in the dataset\n",
+        "print(\"\\nVariables:\")\n",
+        "for var in dataset.variables.values():\n",
+        "    print(var.name, var.shape, var.dtype)\n",
+        "\n",
+        "# Access specific variables\n",
+        "#temperature = dataset.variables['t2m']  # 't2m' is the 2m temperature variable\n",
+        "time = dataset.variables['time']\n",
+        "\n",
+        "# Read the data into memory\n",
+        "#temp_data = temperature[:]\n",
+        "#time_data = time[:]"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "0dySbyeNHv4w",
+        "outputId": "ffef8900-5b3b-492c-92da-4164e8cfd323"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Dimensions:\n",
+            "longitude 41\n",
+            "latitude 29\n",
+            "time 8760\n",
+            "\n",
+            "Variables:\n",
+            "longitude (41,) float32\n",
+            "latitude (29,) float32\n",
+            "time (8760,) int32\n",
+            "u (8760, 29, 41) int16\n",
+            "v (8760, 29, 41) int16\n"
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "colab": {
+      "name": "Olá, este é o Colaboratory",
+      "toc_visible": true,
+      "provenance": [],
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "display_name": "Python 3",
+      "name": "python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 0
+}
